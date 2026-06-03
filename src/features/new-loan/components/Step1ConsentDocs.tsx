@@ -179,80 +179,160 @@ export function Step1ConsentDocs() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uploads['identityDoc'] || !uploads['landOwnerProof']) {
-      alert("Please upload all required documents first.");
-      return;
-    }
-    if (otpStatus !== 'success') {
-      alert("Please verify the farmer's Fayda OTP first.");
-      return;
-    }
     dispatch(nextStep());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-5">
-      <div className="rounded-2xl border border-gray-200 bg-white px-4 py-5 shadow-sm sm:px-6">
-        <h2 className="mb-5 border-b border-gray-200 pb-4 text-base font-semibold text-gray-800">Consent Form & OTP</h2>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-gray-700">Farmer ID / Fayda ID</label>
-              <div className="flex gap-3">
-                <input type="text" placeholder="Search ID" value={farmerIdSearch} onChange={e => setFarmerIdSearch(e.target.value)} disabled={isFarmerFound} className="w-full rounded-lg border px-3 py-2.5 text-sm" />
-                <button type="button" onClick={() => setIsFarmerFound(true)} className="rounded-lg bg-[#16A34A] px-4 py-2.5 text-sm text-white">Search</button>
-              </div>
+      {/* Consent Management Box */}
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-base font-bold text-gray-900">Consent Management</h2>
+        </div>
+        <div className="p-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {/* Left Side: Farmer ID */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-700">Farmer ID / Fayda ID</label>
+            <input 
+              type="password" 
+              placeholder="***********" 
+              value={farmerIdSearch} 
+              onChange={e => setFarmerIdSearch(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm bg-gray-50 focus:bg-white" 
+            />
+            <div className="flex items-center gap-1.5 mt-2">
+              <Check className="text-white bg-green-500 rounded-full p-0.5" size={16} />
+              <p className="text-sm text-gray-500">
+                <span className="font-semibold text-green-600 cursor-pointer">View Consent Details</span> provided on May 25, 2026
+              </p>
             </div>
-            
-            <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-[#f4f8ff] p-4">
-              <Info className="mt-0.5 shrink-0 text-blue-500" size={18} />
-              <div>
-                <p className="text-sm font-semibold text-[#2563eb]">Consent Authorization</p>
-                <p className="mt-1 text-xs text-blue-700/80 leading-relaxed">By requesting OTP, you confirm the farmer is present and has verbally agreed to share their registry data with AgriBank.</p>
-              </div>
-            </div>
-
-            <button type="button" onClick={() => setShowOtpVerification(true)} className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#16A34A] py-3 text-sm text-white shadow-sm hover:bg-[#15803d]">
-              <Send size={16} /> Send OTP Request
-            </button>
           </div>
 
-          {showOtpVerification && (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-[#f9fafb] p-8 h-full">
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm border border-gray-100">
-                <Smartphone className="text-[#16A34A] animate-bounce" size={24} />
+          {/* Right Side: Upload Form */}
+          <div className="rounded-xl border border-blue-50 bg-[#f8fbff] p-4">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800">Signed Consent Form</h3>
+                <p className="text-xs text-gray-500">Physical copy signed by farmer</p>
               </div>
-              <h3 className="mb-3 text-lg font-bold text-gray-800">Fayda OTP Verification</h3>
-              <p className="text-center text-sm text-gray-500">OTP sent to 091****645</p>
-
-              <div className="mt-6 flex justify-center gap-2">
-                {otp.map((digit, i) => (
-                  <input key={i} type="text" maxLength={1} value={digit} onChange={e => handleOtpChange(i, e.target.value)} ref={el => { otpInputRefs.current[i] = el; }} className="h-12 w-10 sm:h-14 sm:w-12 rounded-lg border text-center text-xl font-semibold text-gray-800 shadow-sm" />
-                ))}
-              </div>
-
-              {otpStatus === 'error' && <p className="mt-4 text-sm text-red-600 bg-red-50 border border-red-100 px-4 py-2 rounded-lg">Incorrect OTP. Please try again.</p>}
-              {otpStatus === 'success' && <p className="mt-4 text-sm text-green-600 bg-green-50 border border-green-100 px-4 py-2 rounded-lg">OTP Verified!</p>}
-
-              <button type="button" onClick={handleVerifyOtp} className="mt-6 w-full rounded-lg bg-[#16A34A] py-3 text-sm font-medium text-white shadow-sm hover:bg-[#15803d]">Verify Code</button>
+              <span className="flex items-center gap-1.5 rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-600">
+                <span className="h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span> Uploading
+              </span>
             </div>
-          )}
+            {/* File progress bar card */}
+            <div className="rounded-lg border border-gray-200 bg-white p-3 flex items-center gap-4 shadow-sm">
+              <div className="p-2 bg-red-50 rounded-lg text-red-500">
+                <FileText size={24} />
+              </div>
+              <div className="flex-1 flex flex-col gap-1.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-semibold text-gray-800">consent_signed_2024.pdf</span>
+                  <span className="text-gray-500 font-medium">45%</span>
+                </div>
+                <div className="text-[10px] text-gray-500">1.2 MB / 4.5 MB</div>
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500 w-[45%] rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white px-4 py-5 shadow-sm sm:px-6">
-        <h2 className="mb-5 flex items-center gap-1 text-base font-semibold text-gray-800 pb-4 border-b border-gray-200"><span className="text-red-500">*</span> Required Documents</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {INLINE_DOCS.map(doc => (
-            <DocUploadCard key={doc.id} doc={doc} entry={uploads[doc.id]} uploadProgress={progress[doc.id]} onUpload={f => handleUpload(doc.id, f)} onRemove={() => setUploads(p => { const n = {...p}; delete n[doc.id]; return n; })} showCamera={doc.showCamera} />
-          ))}
+      {/* Supporting Documents Box */}
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-1.5">
+          <span className="text-red-500 font-bold">*</span>
+          <h2 className="text-base font-bold text-gray-900">Supporting Documents</h2>
+        </div>
+        <div className="p-6 flex flex-col gap-6">
+          {/* Drag Drop Area */}
+          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center bg-gray-50/50">
+             <Folder size={32} className="text-gray-400 mb-3" />
+             <p className="text-sm font-semibold text-gray-700">Drag and drop files here</p>
+             <p className="text-sm text-gray-500 my-1">Or</p>
+             <p className="text-sm text-gray-700">Click Browse files to select a file</p>
+             <button type="button" className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-green-600">
+               + Browse Files
+             </button>
+          </div>
+
+          {/* Documents Table */}
+          <div className="overflow-hidden rounded-xl border border-gray-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 font-semibold text-gray-500">Type</th>
+                  <th className="px-4 py-3 font-semibold text-gray-500">Description</th>
+                  <th className="px-4 py-3 font-semibold text-gray-500 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                <tr>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                       <div className="p-2 border border-gray-200 rounded-lg bg-white">
+                         <FileText size={18} className="text-gray-400" />
+                       </div>
+                       <div>
+                         <p className="font-semibold text-gray-800">ID Proof</p>
+                         <p className="text-xs text-gray-500">householdID.png</p>
+                       </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-gray-500">Household ID added for 2 members</td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                       <button type="button" className="flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1.5 text-xs font-semibold text-green-600 hover:bg-green-50">
+                          <Eye size={14} /> View
+                       </button>
+                       <button type="button" className="flex items-center justify-center rounded-full border border-red-200 bg-white p-1.5 text-red-500 hover:bg-red-50">
+                          <X size={14} />
+                       </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                       <div className="p-2 border border-gray-200 rounded-lg bg-white">
+                         <FileText size={18} className="text-gray-400" />
+                       </div>
+                       <div>
+                         <p className="font-semibold text-gray-800">ID Proof</p>
+                         <p className="text-xs text-gray-500">householdID.png</p>
+                       </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-gray-500">Household ID added for 2 members</td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                       <button type="button" className="flex items-center gap-1.5 rounded-full border border-green-200 bg-white px-3 py-1.5 text-xs font-semibold text-green-600 hover:bg-green-50">
+                          <Eye size={14} /> View
+                       </button>
+                       <button type="button" className="flex items-center justify-center rounded-full border border-red-200 bg-white p-1.5 text-red-500 hover:bg-red-50">
+                          <X size={14} />
+                       </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-      
-      <div className="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-6">
-        <button type="submit" className="flex items-center gap-2 rounded-xl bg-[#16A34A] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#15803d] transition-all">
-          Verify & Next <ArrowRight size={16} />
+
+      {/* Footer */}
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-6">
+          <button type="button" className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-all">Save Draft</button>
+          <span className="flex items-center gap-1.5 text-sm font-medium text-[#16335A]">
+            <Check size={16} /> Auto-saved
+          </span>
+        </div>
+        <button type="submit" className="flex items-center gap-2 rounded-lg bg-[#16A34A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#15803d] transition-all">
+          Confirm & Next <ArrowRight size={16} />
         </button>
       </div>
     </form>

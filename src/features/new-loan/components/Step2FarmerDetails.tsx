@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { nextStep, prevStep } from '@/features/new-loan/store/newLoanFormSlice';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { TextField } from '@/components/ui/TextField';
 import { SelectField } from '@/components/ui/SelectField';
 import { GENDER_OPTIONS, MARITAL_OPTIONS, EDUCATION_OPTIONS, REGIONS } from '@/features/loans/constants/loans.constants';
@@ -45,13 +45,21 @@ export function Step2FarmerDetails() {
         </div>
       </div>
 
-      <div className="mt-6 flex justify-between border-t border-gray-100 pt-6">
-        <button type="button" onClick={() => dispatch(prevStep())} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200">
-          <ArrowLeft size={16} /> Back
-        </button>
-        <button type="submit" className="flex items-center gap-2 rounded-xl bg-[#16A34A] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#15803d] transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#16A34A]/50">
-          Save & Continue <ArrowRight size={16} />
-        </button>
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm flex items-center justify-between px-6 py-4 mt-6">
+        <div className="flex items-center gap-6">
+          <button type="button" className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-all">Save Draft</button>
+          <span className="flex items-center gap-1.5 text-sm font-medium text-[#16335A]">
+            <Check size={16} /> Auto-saved
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => dispatch(prevStep())} className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+            <ArrowLeft size={16} /> Previous Step
+          </button>
+          <button type="submit" className="flex items-center gap-2 rounded-lg bg-[#16A34A] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#15803d] transition-all">
+            Confirm & Next <ArrowRight size={16} />
+          </button>
+        </div>
       </div>
     </form>
   );
