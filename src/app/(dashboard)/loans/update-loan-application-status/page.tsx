@@ -6,9 +6,7 @@ import {
   MapPin, Banknote, Calendar,
 } from 'lucide-react';
 
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchLoans, updateLoanStatus, selectPagedRowsData, selectIsLoansLoading } from '@/features/loans/store/loanDashboardSlice';
+import { useLoans, useUpdateLoanStatus } from '@/features/loans/hooks/useLoans';
 import {
   STATUS_CFG,
   LOAN_STATUSES,
@@ -20,18 +18,18 @@ import LoanStatusBadge from '@/features/loans/components/LoanStatusBadge';
 
 // ─── KPI configuration ────────────────────────────────────────────────────────
 const KPI_CFG = [
-  { key: 'total', label: 'Total Applications', icon: FileText, iconBg: 'bg-slate-600' },
-  { key: 'Pending Review', label: 'Pending Review', icon: Clock3, iconBg: 'bg-blue-500' },
-  { key: 'Action Required', label: 'Action Required', icon: AlertTriangle, iconBg: 'bg-red-500' },
-  { key: 'Approved', label: 'Approved', icon: CheckCircle2, iconBg: 'bg-green-500' },
+  { key: 'total',           label: 'Total Applications', icon: FileText,      iconBg: 'bg-slate-600'  },
+  { key: 'Pending Review',  label: 'Pending Review',     icon: Clock3,        iconBg: 'bg-blue-500'   },
+  { key: 'Action Required', label: 'Action Required',    icon: AlertTriangle, iconBg: 'bg-red-500'    },
+  { key: 'Approved',        label: 'Approved',           icon: CheckCircle2,  iconBg: 'bg-green-500'  },
 ];
 
 // ─── Update Panel ─────────────────────────────────────────────────────────────
 function UpdatePanel({ loan, onClose, onConfirm }: any) {
   const [newStatus, setNewStatus] = useState('');
-  const [reason, setReason] = useState('');
-  const [notes, setNotes] = useState('');
-  const [done, setDone] = useState(false);
+  const [reason,    setReason]    = useState('');
+  const [notes,     setNotes]     = useState('');
+  const [done,      setDone]      = useState(false);
 
   function handleConfirm() {
     if (!newStatus) return;
@@ -52,7 +50,7 @@ function UpdatePanel({ loan, onClose, onConfirm }: any) {
       {/* slide-over panel */}
       <aside className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[500px] flex-col bg-white shadow-2xl">
         {/* header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
           <div className="flex items-center gap-2.5">
             <RefreshCcw size={20} className="text-text-primary" strokeWidth={2} />
             <h3 className="text-lg font-semibold text-text-primary">Update Loan Status</h3>
@@ -94,9 +92,9 @@ function UpdatePanel({ loan, onClose, onConfirm }: any) {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                   {[
                     { label: 'Application ID', value: loan.id },
-                    { label: 'Applicant', value: loan.applicant },
-                    { label: 'Loan Type', value: loan.type },
-                    { label: 'Loan Term', value: loan.loanTerm },
+                    { label: 'Applicant',       value: loan.applicant },
+                    { label: 'Loan Type',       value: loan.type },
+                    { label: 'Loan Term',       value: loan.loanTerm },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <p className="text-xs text-text-muted">{label}</p>
@@ -142,10 +140,11 @@ function UpdatePanel({ loan, onClose, onConfirm }: any) {
                         key={s}
                         type="button"
                         onClick={() => { setNewStatus(s); setReason(''); }}
-                        className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition ${sel
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-slate-50'
-                          }`}
+                        className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition ${
+                          sel
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-slate-50'
+                        }`}
                       >
                         <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${cfg?.dot ?? 'bg-slate-400'}`} />
                         <span className={`flex-1 text-sm font-medium ${sel ? 'text-green-700' : 'text-text-primary'}`}>
@@ -170,10 +169,11 @@ function UpdatePanel({ loan, onClose, onConfirm }: any) {
                         key={r}
                         type="button"
                         onClick={() => setReason(r)}
-                        className={`rounded-lg border px-3.5 py-2 text-sm font-medium transition ${reason === r
-                          ? 'border-green-600 bg-green-50 text-green-700'
-                          : 'border-gray-200 text-text-muted hover:border-gray-300 hover:text-text-primary'
-                          }`}
+                        className={`rounded-lg border px-3.5 py-2 text-sm font-medium transition ${
+                          reason === r
+                            ? 'border-green-600 bg-green-50 text-green-700'
+                            : 'border-gray-200 text-text-muted hover:border-gray-300 hover:text-text-primary'
+                        }`}
                       >
                         {r}
                       </button>
@@ -193,7 +193,7 @@ function UpdatePanel({ loan, onClose, onConfirm }: any) {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Add any additional comments or context for this update..."
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-gray-500 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-text-primary placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
                 />
               </section>
             </div>
@@ -223,24 +223,19 @@ function UpdatePanel({ loan, onClose, onConfirm }: any) {
   );
 }
 
+// ─── Main Page ────────────────────────────────────────────────────────────────
 function UpdateLoanStatus() {
-  const dispatch = useAppDispatch();
-  const rawLoans = useAppSelector(selectPagedRowsData);
-  const loans = rawLoans?.pagedRows || [];
-  const isLoading = useAppSelector(selectIsLoansLoading);
-
-  useEffect(() => {
-    dispatch(fetchLoans());
-  }, [dispatch]);
-  const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('All');
-  const [page, setPage] = useState(1);
-  const [panelLoan, setPanelLoan] = useState<any>(null);
+  const { data: loans = [], isLoading } = useLoans();
+  const updateLoanMutation = useUpdateLoanStatus();
+  const [search,     setSearch]     = useState('');
+  const [activeTab,  setActiveTab]  = useState('All');
+  const [page,       setPage]       = useState(1);
+  const [panelLoan,  setPanelLoan]  = useState<any>(null);
 
   // KPI counts
   const counts = useMemo(() => {
     const c = { total: loans.length };
-    loans.forEach((l: any) => { (c as any)[l.status] = ((c as any)[l.status] || 0) + 1; });
+    loans.forEach((l) => { (c as any)[l.status] = ((c as any)[l.status] || 0) + 1; });
     return c;
   }, [loans]);
 
@@ -248,15 +243,15 @@ function UpdateLoanStatus() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return loans.filter(
-      (l: any) =>
+      (l) =>
         (activeTab === 'All' || l.status === activeTab) &&
         (!q || `${l.id} ${l.applicant} ${l.region} ${l.type}`.toLowerCase().includes(q)),
     );
   }, [loans, search, activeTab]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const visible = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const safePage   = Math.min(page, totalPages);
+  const visible    = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   // Page number window (up to 5 around current)
   const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1).slice(
@@ -265,7 +260,7 @@ function UpdateLoanStatus() {
   );
 
   function handleStatusUpdate({ loanId, newStatus }: any) {
-    dispatch(updateLoanStatus({ id: loanId, status: newStatus }));
+    updateLoanMutation.mutate({ id: loanId, status: newStatus });
   }
 
   return (
@@ -339,15 +334,17 @@ function UpdateLoanStatus() {
               key={tab}
               type="button"
               onClick={() => { setActiveTab(tab); setPage(1); }}
-              className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 py-4 px-3 text-sm font-medium transition ${activeTab === tab
-                ? 'border-green-600 text-green-600'
-                : 'border-transparent text-text-muted hover:text-text-primary'
-                }`}
+              className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 py-4 px-3 text-sm font-medium transition ${
+                activeTab === tab
+                  ? 'border-green-600 text-green-600'
+                  : 'border-transparent text-text-muted hover:text-text-primary'
+              }`}
             >
               {tab}
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${activeTab === tab ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-text-muted'
-                  }`}
+                className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                  activeTab === tab ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-text-muted'
+                }`}
               >
                 {tab === 'All' ? loans.length : ((counts as any)[tab] ?? 0)}
               </span>
@@ -401,7 +398,7 @@ function UpdateLoanStatus() {
                   </td>
                 </tr>
               ) : (
-                visible.map((loan: any) => (
+                visible.map((loan) => (
                   <tr key={loan.id} className="transition-colors hover:bg-slate-50">
                     <td className="px-5 py-4">
                       <span className="font-bold text-[#16A34A]">{loan.id}</span>
@@ -462,10 +459,11 @@ function UpdateLoanStatus() {
                 type="button"
                 onClick={() => setPage(pg)}
                 aria-current={safePage === pg ? 'page' : undefined}
-                className={`h-9 w-9 rounded-lg text-sm font-medium transition ${safePage === pg
-                  ? 'bg-green-600 text-white'
-                  : 'border border-[#e9e9e9] bg-white text-text-muted hover:bg-slate-50'
-                  }`}
+                className={`h-9 w-9 rounded-lg text-sm font-medium transition ${
+                  safePage === pg
+                    ? 'bg-green-600 text-white'
+                    : 'border border-[#e9e9e9] bg-white text-text-muted hover:bg-slate-50'
+                }`}
               >
                 {pg}
               </button>
