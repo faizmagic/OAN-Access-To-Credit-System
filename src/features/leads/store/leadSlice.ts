@@ -1,69 +1,198 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { leadService } from '../../../services/lead.service';
-import type { Lead, GetLeadsParams } from '../../../types/leads.types';
+import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '../../../store';
+import { leadService } from '@/features/leads/api/lead.service';
+import type { GetLeadsParams, Lead, LeadSummaryResponse } from '@/features/leads/types/leads.types';
 
-interface LeadState {
-  leads: Lead[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
-}
-
-const initialState: LeadState = {
-  leads: [],
-  status: 'idle',
-  error: null,
-};
-
-export const fetchLeadsThunk = createAsyncThunk<
-  Lead[],
-  GetLeadsParams | undefined,
-  { rejectValue: string }
->(
+export const fetchLeads = createAsyncThunk(
   'leads/fetchLeads',
-  async (params, { rejectWithValue }) => {
+  async (params: GetLeadsParams | undefined, { rejectWithValue }) => {
     try {
-      const data = await leadService.getLeads(params);
-      return data;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        return rejectWithValue(err.message || 'Failed to fetch leads.');
-      }
-      return rejectWithValue('Failed to fetch leads.');
+      const response = await leadService.getLeads(params);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch leads');
     }
   }
 );
+
+export const fetchLeadSummary = createAsyncThunk(
+  'leads/fetchLeadSummary',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await leadService.getLeadSummary();
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch lead summary');
+    }
+  }
+);
+
+export interface AdvFilters {
+  statuses: string[];
+  callStatus: string;
+  quickDate: string;
+  dateFrom: string;
+  dateTo: string;
+  location: string;
+  minAmount: number | null;
+  maxAmount: number | null;
+  loanType: string | null;
+  leadSources: string[];
+}
+
+interface LeadState {
+  selectedLeadIds: string[];
+  leads: Lead[];
+  totalCount: number;
+  isLeadsLoading: boolean;
+  leadsError: string | null;
+  leadSummary: LeadSummaryResponse | null;
+  isSummaryLoading: boolean;
+  summaryError: string | null;
+  // Filters
+  search: string;
+  activeTab: string;
+  dateFilter: string;
+  colStatusFilter: string[];
+  colCallTimeFilter: string[];
+  advFilters: AdvFilters;
+}
+
+const initialFilters: AdvFilters = {
+  statuses: [],
+  callStatus: 'All',
+  quickDate: '',
+  dateFrom: '',
+  dateTo: '',
+  location: '',
+  minAmount: null,
+  maxAmount: null,
+  loanType: null,
+  leadSources: [],
+};
+
+const initialState: LeadState = {
+  selectedLeadIds: [],
+  leads: [],
+  totalCount: 0,
+  isLeadsLoading: false,
+  leadsError: null,
+  leadSummary: null,
+  isSummaryLoading: false,
+  summaryError: null,
+  search: '',
+  activeTab: 'all',
+  dateFilter: 'All Time',
+  colStatusFilter: [],
+  colCallTimeFilter: [],
+  advFilters: initialFilters,
+};
 
 const leadSlice = createSlice({
   name: 'leads',
   initialState,
   reducers: {
-    clearLeadsStatus(state) {
-      state.status = 'idle';
-      state.error = null;
-    }
+    toggleLeadSelection(state, action: PayloadAction<string>) {
+      const id = action.payload;
+      const idx = state.selectedLeadIds.indexOf(id);
+      if (idx >= 0) {
+        state.selectedLeadIds.splice(idx, 1);
+      } else {
+        state.selectedLeadIds.push(id);
+      }
+    },
+    clearLeadSelection(state) {
+      state.selectedLeadIds = [];
+    },
+    setSearch(state, action: PayloadAction<string>) {
+      state.search = action.payload;
+    },
+    setActiveTab(state, action: PayloadAction<string>) {
+      state.activeTab = action.payload;
+    },
+    setDateFilter(state, action: PayloadAction<string>) {
+      state.dateFilter = action.payload;
+    },
+    setColStatusFilter(state, action: PayloadAction<string[]>) {
+      state.colStatusFilter = action.payload;
+    },
+    setColCallTimeFilter(state, action: PayloadAction<string[]>) {
+      state.colCallTimeFilter = action.payload;
+    },
+    setAdvFilters(state, action: PayloadAction<AdvFilters>) {
+      state.advFilters = action.payload;
+    },
+    resetFilters(state) {
+      state.search = '';
+      state.activeTab = 'all';
+      state.dateFilter = 'All Time';
+      state.colStatusFilter = [];
+      state.colCallTimeFilter = [];
+      state.advFilters = initialFilters;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchLeadsThunk.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
+      // fetchLeads
+      .addCase(fetchLeads.pending, (state) => {
+        state.isLeadsLoading = true;
+        state.leadsError = null;
       })
-      .addCase(fetchLeadsThunk.fulfilled, (state, action: PayloadAction<Lead[]>) => {
-        state.status = 'succeeded';
-        state.leads = action.payload;
+      .addCase(fetchLeads.fulfilled, (state, action) => {
+        state.isLeadsLoading = false;
+        state.leads = action.payload.results;
+        state.totalCount = action.payload.totalCount;
       })
-      .addCase(fetchLeadsThunk.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload ?? 'Something went wrong.';
+      .addCase(fetchLeads.rejected, (state, action) => {
+        state.isLeadsLoading = false;
+        state.leadsError = action.payload as string;
+      })
+      // fetchLeadSummary
+      .addCase(fetchLeadSummary.pending, (state) => {
+        state.isSummaryLoading = true;
+        state.summaryError = null;
+      })
+      .addCase(fetchLeadSummary.fulfilled, (state, action) => {
+        state.isSummaryLoading = false;
+        state.leadSummary = action.payload;
+      })
+      .addCase(fetchLeadSummary.rejected, (state, action) => {
+        state.isSummaryLoading = false;
+        state.summaryError = action.payload as string;
       });
   },
 });
 
-export const { clearLeadsStatus } = leadSlice.actions;
+export const {
+  toggleLeadSelection,
+  clearLeadSelection,
+  setSearch,
+  setActiveTab,
+  setDateFilter,
+  setColStatusFilter,
+  setColCallTimeFilter,
+  setAdvFilters,
+  resetFilters,
+} = leadSlice.actions;
 
-export const selectAllLeads = (state: RootState) => state.leads.leads;
-export const selectLeadsStatus = (state: RootState) => state.leads.status;
-export const selectLeadsError = (state: RootState) => state.leads.error;
+export const selectSelectedLeadIds = (state: RootState) => state.leads.selectedLeadIds;
+export const selectLeads = (state: RootState) => state.leads.leads;
+export const selectTotalCount = (state: RootState) => state.leads.totalCount;
+export const selectIsLeadsLoading = (state: RootState) => state.leads.isLeadsLoading;
+export const selectLeadsError = (state: RootState) => state.leads.leadsError;
+export const selectLeadSummary = (state: RootState) => state.leads.leadSummary;
+export const selectIsSummaryLoading = (state: RootState) => state.leads.isSummaryLoading;
+
+export const selectSearch = (state: RootState) => state.leads.search;
+export const selectActiveTab = (state: RootState) => state.leads.activeTab;
+export const selectDateFilter = (state: RootState) => state.leads.dateFilter;
+export const selectColStatusFilter = (state: RootState) => state.leads.colStatusFilter;
+export const selectColCallTimeFilter = (state: RootState) => state.leads.colCallTimeFilter;
+export const selectAdvFilters = (state: RootState) => state.leads.advFilters;
+
+// ── Backend Filter Pass-Through ──
+
+export const selectFilteredLeads = (state: RootState) => state.leads.leads;
+
 
 export default leadSlice.reducer;

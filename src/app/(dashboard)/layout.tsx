@@ -1,19 +1,31 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
-import { ListChecks, Users } from 'lucide-react';
-import Sidebar from '@/components/layout/Sidebar';
-import TopHeader from '@/components/layout/TopHeader';
-import { selectIsAuthenticated } from '@/features/auth/store/authSlice';
-import '@/assets/styles/main-layout.scss';
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { ListChecks, Users, LayoutDashboard, type LucideIcon } from 'lucide-react';
+import Sidebar, { NavSection } from '@/components/Sidebar';
+import TopHeader from '@/components/TopHeader';
+import { selectIsAuthenticated, logout as logoutAction } from '@/features/auth/store/authSlice';
 
-const navigationSections = [
+import '@/styles/main-layout.scss';
+
+const navigationSections: NavSection[] = [
   {
     title: 'DASHBOARDS',
     items: [
-      { path: '/leads-dashboard', label: 'Leads Dashboard', icon: Users },
+      { 
+        path: '/leads',
+        activePaths: ['/leads', '/leads/new'],
+        label: 'Leads Dashboard', 
+        icon: Users 
+      },
+      { 
+        path: '/loan-application-dashboard',
+        activePaths: ['/loan-application-dashboard'],
+        label: 'Loans Dashboard', 
+        icon: LayoutDashboard 
+      },
     ],
   },
   {
@@ -30,8 +42,9 @@ const navigationSections = [
 ];
 
 const PAGE_TITLES: Record<string, string> = {
-  '/leads-dashboard': 'Leads Dashboard',
+  '/leads': 'Leads Pipeline',
   '/loans/new-loan-application': 'New Loan Application',
+  '/leads/new': 'Create New Lead',
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -39,18 +52,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  // Secure Auth Guard
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/login');
-    }
-  }, [isAuthenticated, router]);
+  const activeItem = navigationSections
+    .flatMap((section) => section.items)
+    .find((item) => item.path === pathname || item.activePaths?.includes(pathname));
 
-  const pageTitle = PAGE_TITLES[pathname] ?? 'Dashboard';
+  const pageTitle = activeItem?.label ?? PAGE_TITLES[pathname] ?? 'Dashboard';
 
+
+
+  // update the title of the page
   useEffect(() => {
     document.title = `${pageTitle} | Open AgriNet`;
   }, [pageTitle]);
@@ -65,10 +79,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     } else {
       setIsSidebarCollapsed((prev) => !prev);
     }
-  }
-
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (
@@ -88,7 +98,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <TopHeader
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={handleToggleSidebar}
-          onLogout={() => router.push('/login')}
+          onLogout={async () => {
+            await fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
+            dispatch(logoutAction());
+            router.push('/login');
+          }}
           pageTitle={pageTitle}
         />
         <div id="dashboard-content" className="dashboard-content">
