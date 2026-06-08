@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { Roboto, Space_Grotesk } from 'next/font/google';
+import { DM_Sans, Space_Grotesk } from 'next/font/google';
 import { Providers } from './providers';
-import '@/styles/main.scss';
+import '../assets/styles/main.scss';
+import '../assets/styles/login.scss';
 
-const roboto = Roboto({
-  weight: ['400', '500', '700'],
+const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
@@ -27,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${roboto.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
-      <body className="font-body antialiased" suppressHydrationWarning>
+    <html lang="en" className={`${dmSans.variable} ${spaceGrotesk.variable}`}>
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -1,29 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
-  const resolvedParams = await params;
-  return handleProxy(request, resolvedParams.path);
+export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
+  return handleProxy(request, params.path);
 }
 
-// Statically export other HTTP verbs by aliasing the GET reference
-export { GET as POST, GET as PUT, GET as DELETE };
+export async function POST(request: NextRequest, { params }: { params: { path: string[] } }) {
+  return handleProxy(request, params.path);
+}
+
+export async function PUT(request: NextRequest, { params }: { params: { path: string[] } }) {
+  return handleProxy(request, params.path);
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { path: string[] } }) {
+  return handleProxy(request, params.path);
+}
 
 async function handleProxy(request: NextRequest, pathArray: string[]) {
-  const baseUrl = process.env.API_BASE_URL;
-
-  if (!baseUrl) {
-    return NextResponse.json({ message: 'API_BASE_URL is not configured' }, { status: 500 });
-  }
+  const baseUrl = 'https://a2c-backend-development.oanstaging.com';
 
   // Construct the target URL
   const targetPath = pathArray.join('/');
-  const search = request.nextUrl.search;
+  const { search } = new URL(request.url);
   const targetUrl = `${baseUrl}/${targetPath}${search}`;
 
-  // Read auth_token cookie
+  // Read the HttpOnly auth_token cookie
   const authToken = request.cookies.get('auth_token')?.value;
 
-  // Prepare headers 
+  // Prepare headers for the external request
   const headers = new Headers();
   request.headers.forEach((value, key) => {
     // Avoid forwarding headers that might cause issues
