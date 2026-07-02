@@ -70,6 +70,13 @@ async function handleProxy(request: NextRequest, pathArray: string[]) {
     const responseHeaders = new Headers(response.headers);
     responseHeaders.delete('content-encoding'); // Let Next.js handle encoding
 
+    // Allow same-origin framing so in-app document previews (PDF <iframe>) render.
+    // The global X-Frame-Options: DENY (next.config.mjs) and frame-ancestors 'none'
+    // (src/proxy.ts) otherwise block the same-origin iframe, surfacing in the
+    // browser as "localhost refused to connect".
+    responseHeaders.set('X-Frame-Options', 'SAMEORIGIN');
+    responseHeaders.set('Content-Security-Policy', "frame-ancestors 'self'");
+
     return new NextResponse(response.body, {
       status: response.status,
       statusText: response.statusText,

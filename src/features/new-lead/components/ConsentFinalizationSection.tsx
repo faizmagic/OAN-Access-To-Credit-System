@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, ChangeEvent } from 'react';
+
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { submitConsentThunk, selectConsentState } from '../store/consentSlice';
 import { selectIsPollingLong, selectFarmerState } from '../store/farmerSlice';
@@ -33,6 +34,32 @@ export function ConsentFinalizationSection() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [consentFile, setConsentFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Cached Farmer Profile Image
+  const [cachedImageUrl, setCachedImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const imgUrl = farmerDetails?.profileImageUrl || searchedFarmer?.profileImageUrl;
+    if (imgUrl) {
+      setCachedImageUrl(imgUrl);
+      if (leadId) {
+        try {
+          sessionStorage.setItem(`farmer_profile_image_${leadId}`, imgUrl);
+        } catch (e) {
+          // ignore sessionStorage errors in restricted environments
+        }
+      }
+    } else if (leadId) {
+      try {
+        const stored = sessionStorage.getItem(`farmer_profile_image_${leadId}`);
+        if (stored) {
+          setCachedImageUrl(stored);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [farmerDetails?.profileImageUrl, searchedFarmer?.profileImageUrl, leadId]);
 
   // Fetch metadata options on mount if OTP is verified
   useEffect(() => {
@@ -196,36 +223,35 @@ export function ConsentFinalizationSection() {
 
         <div className="flex flex-col gap-5 px-6 w-full mt-4">
           {/* Farmer Details Box */}
-          <div className="flex flex-row justify-between items-center p-4 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB]">
-            <div className="flex flex-row gap-4 items-center">
-              {(farmerDetails?.profileImageUrl || searchedFarmer?.profileImageUrl) && (
-                <div className="flex-shrink-0">
-                  <img 
-                    src={farmerDetails?.profileImageUrl || searchedFarmer?.profileImageUrl} 
-                    alt="Farmer Profile" 
-                    className="w-16 h-16 rounded-full object-cover border-2 border-[#16A34A] shadow-sm bg-white"
-                  />
-                </div>
-              )}
-              <div className="flex flex-col gap-2 items-start">
-                <span className="px-2 py-0.5 bg-[#E8F5E9] text-[#16A34A] text-[10px] font-bold tracking-wider rounded uppercase">
-                  SELECTED FARMER
+          <div className="flex flex-row justify-between items-center p-5 border border-[#E5E7EB] rounded-xl bg-[#F9FAFB] shadow-sm">
+            <div className="flex flex-col gap-2 items-start">
+              <span className="px-2 py-0.5 bg-[#E8F5E9] text-[#16A34A] text-[10px] font-bold tracking-wider rounded uppercase">
+                SELECTED FARMER
+              </span>
+              <div className="flex flex-col gap-1.5">
+                <span className="font-bold text-[#1F2937] text-xl bg-[#E0E7FF] px-1.5 rounded-sm w-fit leading-tight uppercase">
+                  {farmerDetails?.firstName || searchedFarmer?.firstName || ''} {farmerDetails?.lastName || searchedFarmer?.lastName || ''}
                 </span>
-                <div className="flex flex-col gap-1.5">
-                  <span className="font-bold text-[#1F2937] text-lg bg-[#E0E7FF] px-1.5 rounded-sm w-fit leading-tight uppercase">
-                    {farmerDetails?.firstName || searchedFarmer?.firstName || ''} {farmerDetails?.lastName || searchedFarmer?.lastName || ''}
-                  </span>
+                <span className="text-sm text-[#6B7280]">
+                  Farmer ID: <span className="bg-[#E0E7FF] px-1 rounded-sm font-medium text-[#4B5563] ml-1">{farmerId || '—'}</span>
+                </span>
+                {(farmerDetails?.phoneNumber || searchedFarmer?.phoneNumber) && (
                   <span className="text-sm text-[#6B7280]">
-                    Farmer ID: <span className="bg-[#E0E7FF] px-1 rounded-sm font-medium text-[#4B5563] ml-1">{farmerId || '—'}</span>
+                    Phone: <span className="font-medium text-[#4B5563] ml-1">{farmerDetails?.phoneNumber || searchedFarmer?.phoneNumber}</span>
                   </span>
-                  {(farmerDetails?.phoneNumber || searchedFarmer?.phoneNumber) && (
-                    <span className="text-sm text-[#6B7280]">
-                      Phone: <span className="font-medium text-[#4B5563] ml-1">{farmerDetails?.phoneNumber || searchedFarmer?.phoneNumber}</span>
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
             </div>
+
+            {cachedImageUrl && (
+              <div className="flex-shrink-0 ml-4">
+                <img
+                  src={cachedImageUrl}
+                  alt="Farmer Profile"
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-[#16A34A] shadow-md bg-white transition-transform duration-300 hover:scale-105"
+                />
+              </div>
+            )}
           </div>
 
           {/* Dynamic File Upload & Consent reason in side-by-side or clean row layout */}

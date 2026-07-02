@@ -196,6 +196,7 @@ export interface BasicProfileBackendData {
   validity_to?: string;
   requested_data_fields?: { field_name: string; field_value: string }[];
   farmer_profile_created?: boolean | undefined;
+  profile_image_url?: string | null;
   consent_request?: {
     name?: string;
     status?: string;
@@ -333,7 +334,8 @@ export const newLeadService = {
       requested_data_fields: lead.requested_data_fields ?? [],
       farmer_profile_created: lead.farmer_profile_created,
       consent_request_status: lead.consent_request?.status,
-      consent_request_otp_verified: lead.consent_request?.otp_verified
+      consent_request_otp_verified: lead.consent_request?.otp_verified,
+      profileImageUrl: lead.profile_image_url ?? ''
     };
   },
 

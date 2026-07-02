@@ -255,6 +255,7 @@ describe('newLeadService', () => {
           location: 'Ambo',
           email: 'alice@example.com',
           gender: 'Female',
+          profile_image_url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
         },
       });
 
@@ -272,6 +273,7 @@ describe('newLeadService', () => {
         validity_from: '',
         validity_to: '',
         websub_delivered_at: '',
+        profileImageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA',
       });
     });
 

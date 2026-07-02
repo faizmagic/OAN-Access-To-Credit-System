@@ -175,6 +175,7 @@ const farmerSlice = createSlice({
           email: action.payload.email || state.farmerDetails.email,
           location: action.payload.location || state.farmerDetails.location,
           gender: action.payload.gender || state.farmerDetails.gender,
+          profileImageUrl: action.payload.profileImageUrl || state.farmerDetails.profileImageUrl,
           websub_delivered_at: action.payload.websub_delivered_at,
           consent_type: action.payload.consent_type,
           purpose: action.payload.purpose,
