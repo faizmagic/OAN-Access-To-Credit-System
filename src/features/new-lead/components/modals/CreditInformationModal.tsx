@@ -1,18 +1,19 @@
-import { SelectField } from '@/components/ui/SelectField';
-import { loanService, type BrowseProductItem } from '@/features/loans/api/loan.service';
-import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+import { useAppSelector } from '@/store/hooks';
+import { selectLoanTypesOptions } from '../../store/newLeadSlice';
+import { SelectField } from '@/components/ui/SelectField';
 import { creditInfoSchema, type CreditInfoFormData } from '../../schemas/credit.schema';
 
 interface CreditInformationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreditInfoFormData & { productId?: string }) => Promise<void>;
+  onSubmit: (data: CreditInfoFormData) => Promise<void>;
 }
 
 export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInformationModalProps) {
-  const [products, setProducts] = useState<BrowseProductItem[]>([]);
+  const loanTypesOptions = useAppSelector(selectLoanTypesOptions);
 
   const [loanType, setLoanType] = useState('');
   const [loanAmount, setLoanAmount] = useState('');
@@ -29,15 +30,6 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
 
   useEffect(() => {
     if (isOpen) {
-      loanService
-        .browseProducts({ limit: 100 })
-        .then((res) => {
-          setProducts(res?.data?.products || []);
-        })
-        .catch(() => {
-          setProducts([]);
-        });
-
       setLoanType('');
       setLoanAmount('');
       setPurposeMessage('');
@@ -49,7 +41,12 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
 
   if (!isOpen || !mounted) return null;
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    // Stop the submit event from bubbling through the React portal to any
+    // ancestor <form> (e.g. LeadLayoutGrid), which would otherwise trigger
+    // an unintended create_lead submission.
+    e?.stopPropagation();
     // 1. Run local Zod schema validation
     const validationResult = creditInfoSchema.safeParse({ loanType, loanAmount, purposeMessage });
     if (!validationResult.success) {
@@ -70,12 +67,7 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
     setError(null);
     setFieldErrors({});
     try {
-      const selectedProduct = products.find((p) => p.product_name === validationResult.data.loanType);
-      const payload: CreditInfoFormData & { productId?: string } = { ...validationResult.data };
-      if (selectedProduct?.name) {
-        payload.productId = selectedProduct.name;
-      }
-      await onSubmit(payload);
+      await onSubmit(validationResult.data);
     } catch (err: any) {
       setIsSubmitting(false);
       const serverMessage = err?.message?.message || (typeof err === 'string' ? err : 'Failed to add credit information');
@@ -90,20 +82,6 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
   const amountError = fieldErrors.loan_amount || fieldErrors.loanAmount;
   const typeError = fieldErrors.loan_type || fieldErrors.loanType;
   const purposeError = fieldErrors.purpose_message || fieldErrors.purposeMessage;
-
-  // Clear a field's error (and the general banner) as soon as the user edits it,
-  // so a stale validation message/red border doesn't linger after a fix.
-  const clearFieldError = (...keys: string[]) => {
-    setFieldErrors((prev) => {
-      if (!keys.some((k) => k in prev)) return prev;
-      const next = { ...prev };
-      for (const k of keys) delete next[k];
-      return next;
-    });
-    setError(null);
-  };
-
-  const productOptions = [...new Set(products.map((p) => p.product_name))];
 
   const modalContent = (
     <>
@@ -130,17 +108,7 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
             </button>
           </div>
 
-          <div
-            className="w-full"
-            onKeyDown={(e) => {
-              // Preserve Enter-to-submit now that there is no native <form>.
-              // Ignore Enter in the textarea so it can still insert newlines.
-              if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          >
+          <form onSubmit={handleSubmit} className="w-full">
           {/* Body */}
           <div className="flex flex-col items-start p-[24px_24px_0px] gap-[16px] w-full">
             {/* General Error Banner */}
@@ -158,21 +126,18 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
             {/* Form Fields Container */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start content-start p-0 gap-[24px] w-full">
 
-              {/* Loan Product Row */}
+              {/* Loan Type Row */}
               <div className="flex flex-col items-start p-0 gap-[6px] w-full sm:w-[358px]">
                 <label className="font-roboto font-medium text-[14px] leading-[20px] text-[#111827]">
-                  Loan Product <span className="text-red-500">*</span>
+                  Loan Type <span className="text-red-500">*</span>
                 </label>
                 <div className="w-full relative z-50">
                   <SelectField
-                    options={productOptions}
+                    options={loanTypesOptions}
                     value={loanType}
-                    onChange={(v) => {
-                      setLoanType(v);
-                      clearFieldError('loan_type', 'loanType');
-                    }}
+                    onChange={setLoanType}
                     error={typeError}
-                    placeholder="Select Loan Product"
+                    placeholder="Select Loan Type"
                   />
                 </div>
               </div>
@@ -186,10 +151,7 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
                   type="number"
                   placeholder="Enter Loan Amount"
                   value={loanAmount}
-                  onChange={(e) => {
-                    setLoanAmount(e.target.value);
-                    clearFieldError('loan_amount', 'loanAmount');
-                  }}
+                  onChange={(e) => setLoanAmount(e.target.value)}
                   className={`box-border flex flex-row items-center p-[8px_16px] w-full h-[44px] bg-white border rounded-[8px] font-roboto font-normal text-[14px] leading-[16px] text-[#111827] placeholder:text-[#C6C6C6] outline-none focus:ring-1 ${
                     amountError
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -211,10 +173,7 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
                 <textarea
                   placeholder="Enter purpose message"
                   value={purposeMessage}
-                  onChange={(e) => {
-                    setPurposeMessage(e.target.value);
-                    clearFieldError('purpose_message', 'purposeMessage');
-                  }}
+                  onChange={(e) => setPurposeMessage(e.target.value)}
                   className={`box-border flex flex-row justify-center items-start p-[12px_16px] w-full h-[140px] bg-white border rounded-[8px] font-roboto font-normal text-[14px] leading-[16px] text-[#111827] placeholder:text-[#C6C6C6] outline-none focus:ring-1 resize-none ${
                     purposeError
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -244,8 +203,7 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
             </button>
 
             <button
-              type="button"
-              onClick={handleSubmit}
+              type="submit"
               disabled={isSubmitting || !loanType || !loanAmount || !purposeMessage}
               className="relative flex flex-row justify-center items-center p-[10px_24px] min-w-[93px] h-[40px] bg-[#16A34A] rounded-[8px] hover:bg-[#15803d] transition-colors overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#16A34A]"
             >
@@ -265,7 +223,7 @@ export function CreditInformationModal({ isOpen, onClose, onSubmit }: CreditInfo
               </span>
             </button>
           </div>
-          </div>
+          </form>
 
         </div>
       </div>

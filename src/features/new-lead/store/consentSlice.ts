@@ -1,10 +1,10 @@
-import type { SendOtpAndCreateConsentResponse, SubmitConsentResponse, VerifyOtpResponse } from '@/lib/api/api.schemas';
-import type { RootState } from '@/store';
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { newLeadService } from '../api/newLead.service';
-import { clearForm, initializeLead } from './actions';
+import type { SendOtpAndCreateConsentResponse, SubmitConsentResponse, VerifyOtpResponse } from '@/lib/api/api.schemas';
 import { fetchLeadDetailsThunk } from './farmerSlice';
 import { formatConsentDate } from './helpers';
+import { initializeLead, clearForm } from './actions';
+import type { RootState } from '@/store';
 
 interface ConsentState {
   isLoadingConsent: boolean;

@@ -1,11 +1,11 @@
+import { useEffect, useState, useRef, ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { AlertCircle, Calendar, CheckSquare, Eye, FileText, Folder, Loader2, Sparkles, Square, Upload, X } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { AllowedDataField, ConsentReason, newLeadService } from '../api/newLead.service';
-import { selectConsentState, submitConsentThunk } from '../store/consentSlice';
-import { selectFarmerState, selectIsPollingLong } from '../store/farmerSlice';
+import { submitConsentThunk, selectConsentState } from '../store/consentSlice';
+import { selectIsPollingLong, selectFarmerState } from '../store/farmerSlice';
 import { ProfileSyncLoadingModal } from './modals/ProfileSyncLoadingModal';
+import { Calendar, FileText, CheckSquare, Square, Loader2, Sparkles, Folder, Eye, X, Upload, AlertCircle } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { newLeadService, ConsentReason, AllowedDataField } from '../api/newLead.service';
 
 export function ConsentFinalizationSection() {
   const dispatch = useAppDispatch();
@@ -105,7 +105,6 @@ export function ConsentFinalizationSection() {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setConsentFile(e.target.files[0]);
-      if (localError) setLocalError(null);
     }
   };
 
@@ -135,7 +134,6 @@ export function ConsentFinalizationSection() {
       setSelectedFieldIds(selectedFieldIds.filter(id => id !== fieldId));
     } else {
       setSelectedFieldIds([...selectedFieldIds, fieldId]);
-      if (localError) setLocalError(null);
     }
   };
 
@@ -238,7 +236,7 @@ export function ConsentFinalizationSection() {
               <div className="flex flex-col gap-2">
                 <label className="text-[14px] font-semibold text-[#374151] flex items-center gap-1.5">
                   <Sparkles size={14} className="text-[#16A34A]" />
-                  Consent Reason / Purpose <span className="text-red-500">*</span>
+                  Consent Reason / Purpose
                 </label>
                 <div className="relative">
                   <select
@@ -246,7 +244,6 @@ export function ConsentFinalizationSection() {
                     onChange={(e) => {
                       const val = e.target.value;
                       setSelectedReasonId(val ? Number(val) : undefined);
-                      if (localError) setLocalError(null);
                     }}
                     className="w-full px-3.5 py-2.5 bg-white border border-[#D1D5DB] rounded-lg text-sm text-[#374151] focus:ring-1 focus:ring-[#16A34A] focus:border-[#16A34A] outline-none transition-all appearance-none cursor-pointer pr-10"
                   >
@@ -372,7 +369,7 @@ export function ConsentFinalizationSection() {
           <div className="flex flex-col gap-3 pt-2">
             <label className="text-[14px] font-semibold text-[#374151] flex items-center gap-1.5">
               <Calendar size={14} className="text-[#6B7280]" />
-              Consent Validity Duration <span className="text-red-500">*</span>
+              Consent Validity Duration
             </label>
             <div className="flex flex-wrap gap-3 items-center justify-between">
               <div className="flex flex-wrap gap-2">
@@ -387,10 +384,7 @@ export function ConsentFinalizationSection() {
                     <button
                       key={preset.value}
                       type="button"
-                      onClick={() => {
-                        setSelectedDuration(preset.value);
-                        if (localError && localError !== 'At least one registry field must be permitted.') setLocalError(null);
-                      }}
+                      onClick={() => setSelectedDuration(preset.value)}
                       className={`px-4 py-2 text-sm font-medium rounded-md border transition-all ${isActive
                         ? 'border-[#16A34A] bg-[#F0FDFA] text-[#15803D] ring-1 ring-[#16A34A]'
                         : 'border-[#D1D5DB] bg-white text-[#374151] hover:bg-gray-50'

@@ -1,9 +1,13 @@
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
-    selectActivityPage, selectPageSize, selectTotalCount, selectTotalPages,
-    setActivityPage, setPageSize
+  selectActivityPage,
+  selectTotalPages,
+  setActivityPage,
+  selectTotalCount,
+  selectPageSize,
+  setPageSize
 } from '../store/loanDashboardSlice';
 
 const LoanPagination = React.memo(() => {

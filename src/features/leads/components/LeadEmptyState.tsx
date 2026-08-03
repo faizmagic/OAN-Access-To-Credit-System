@@ -1,4 +1,4 @@
-import { SearchX, Users, X } from 'lucide-react';
+import { X, SearchX, Users } from 'lucide-react';
 
 interface LeadEmptyStateProps {
   hasFilters: boolean;

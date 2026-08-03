@@ -1,7 +1,7 @@
 'use client';
 
-import { Check, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { X, Check } from 'lucide-react';
 
 interface HavingTroubleModalProps {
   isOpen: boolean;

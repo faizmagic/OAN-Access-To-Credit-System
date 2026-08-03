@@ -1,6 +1,6 @@
-import { fetchApi } from '@/lib/api/fetchApi';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { newLeadService } from './newLead.service';
+import { fetchApi } from '@/lib/api/fetchApi';
 
 vi.mock('@/lib/api/fetchApi', () => ({
   fetchApi: vi.fn(),

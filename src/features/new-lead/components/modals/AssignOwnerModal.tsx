@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
-import { Loader2, Search, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X, Search, Loader2 } from 'lucide-react';
 import { newLeadService } from '../../api/newLead.service';
 
 interface User {

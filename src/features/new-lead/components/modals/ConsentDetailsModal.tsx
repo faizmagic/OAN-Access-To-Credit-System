@@ -1,6 +1,6 @@
-import { CheckCircle2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X, CheckCircle2 } from 'lucide-react';
 
 interface ConsentDetailsModalProps {
   isOpen: boolean;

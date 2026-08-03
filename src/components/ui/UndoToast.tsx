@@ -1,7 +1,7 @@
 'use client';
 
-import { Undo2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Undo2, X } from 'lucide-react';
 
 interface UndoToastProps {
   /** Message shown in the toast, e.g. "Document removed". */

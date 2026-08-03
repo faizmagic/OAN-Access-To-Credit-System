@@ -1,27 +1,38 @@
 'use client';
 
+import { notFound } from 'next/navigation';
 import { LeadLayoutGrid } from '@/features/leads/components/LeadLayoutGrid';
 import { useLeadInitialization } from '@/features/leads/hooks/useLeadInitialization';
-import { selectLeads } from '@/features/leads/store/leadSlice';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import {
-    fetchActivitiesThunk, fetchLeadDetailsThunk, fetchLeadMetadataThunk, fetchLeadProfileThunk, fetchVisitSchedulesThunk, selectConsentState, selectDetailsError, selectFarmerState, selectLeadFirstName,
-    selectLeadLastName, selectLeadPhoneNumber, selectLeadStatus, selectVisitState
+  selectLeadStatus,
+  selectFarmerState,
+  selectDetailsError,
+  selectVisitState,
+  selectConsentState,
+  fetchLeadMetadataThunk,
+  fetchLeadDetailsThunk,
+  fetchVisitSchedulesThunk,
+  fetchActivitiesThunk,
+  fetchLeadProfileThunk,
+  selectLeadPhoneNumber,
+  selectLeadFirstName,
+  selectLeadLastName
 } from '@/features/new-lead';
-import { ActivitySection } from '@/features/new-lead/components/ActivitySection';
-import { CallDetailsSection } from '@/features/new-lead/components/CallDetailsSection';
-import { ConsentFinalizationSection } from '@/features/new-lead/components/ConsentFinalizationSection';
+import { selectLeads } from '@/features/leads/store/leadSlice';
+import { useEffect } from 'react';
+import { LeadInfoSection } from '@/features/new-lead/components/LeadInfoSection';
 import { ConsentManagementSection } from '@/features/new-lead/components/ConsentManagementSection';
-import { CreditInformationSection } from '@/features/new-lead/components/CreditInformationSection';
+import { ConsentFinalizationSection } from '@/features/new-lead/components/ConsentFinalizationSection';
 import { FarmerDetailsSection } from '@/features/new-lead/components/FarmerDetailsSection';
-import { InteractionTimelineCard } from '@/features/new-lead/components/InteractionTimelineCard';
+import { CreditInformationSection } from '@/features/new-lead/components/CreditInformationSection';
+import { CallDetailsSection } from '@/features/new-lead/components/CallDetailsSection';
+import { ActivitySection } from '@/features/new-lead/components/ActivitySection';
+import { ScheduleVisitCard } from '@/features/new-lead/components/ScheduleVisitCard';
 import { LeadAssignmentCard } from '@/features/new-lead/components/LeadAssignmentCard';
+import { InteractionTimelineCard } from '@/features/new-lead/components/InteractionTimelineCard';
 import LeadContextBanner from '@/features/new-lead/components/LeadContextBanner';
 import { LeadDashboardActions } from '@/features/new-lead/components/LeadDashboardActions';
-import { LeadInfoSection } from '@/features/new-lead/components/LeadInfoSection';
-import { ScheduleVisitCard } from '@/features/new-lead/components/ScheduleVisitCard';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { notFound } from 'next/navigation';
-import { useEffect } from 'react';
 
 interface NewLeadDashboardProps {
     id?: string;

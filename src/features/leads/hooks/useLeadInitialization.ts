@@ -1,7 +1,7 @@
-import { fetchLeads, selectLeads } from '@/features/leads/store/leadSlice';
-import { initializeLead } from '@/features/new-lead/store/newLeadSlice';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useEffect, useRef } from 'react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectLeads, fetchLeads } from '@/features/leads/store/leadSlice';
+import { initializeLead } from '@/features/new-lead/store/newLeadSlice';
 
 /**
  * A custom hook to handle Redux state initialization for a Lead.

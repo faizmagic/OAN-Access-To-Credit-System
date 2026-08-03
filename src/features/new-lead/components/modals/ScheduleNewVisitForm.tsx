@@ -1,18 +1,18 @@
 "use client";
 import { logger } from '@/lib/logger';
 
-import { SelectField } from '@/components/ui/SelectField';
-import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+import { SelectField } from '@/components/ui/SelectField';
 
 import { DatePickerField } from '@/components/ui/DatePickerField';
-import { FeedbackModal } from '@/components/ui/FeedbackModal';
 import { TimePickerField } from '@/components/ui/TimePickerField';
-import { normalizeLeadId } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { useParams, useRouter } from 'next/navigation';
 import { scheduleVisitThunk, selectVisitState } from '../..';
+import { useParams, useRouter } from 'next/navigation';
+import { normalizeLeadId } from '@/lib/utils';
+import { FeedbackModal } from '@/components/ui/FeedbackModal';
 
 interface ScheduleNewVisitFormProps {
   asModal?: boolean;

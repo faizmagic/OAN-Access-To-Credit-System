@@ -1,7 +1,29 @@
 export { leadService } from './api/lead.service';
+export type { Lead, GetLeadsParams, GetLeadsResponse, LeadSummaryResponse } from './types/leads.types';
 export {
-    clearLeadSelection, fetchLeads,
-    fetchLeadSummary, resetFilters, selectActiveTab, selectAdvFilters, selectColCallTimeFilter, selectColStatusFilter, selectDateFilter, selectFilteredLeads, selectIsLeadsLoading, selectIsSummaryLoading, selectLeads, selectLeadsError,
-    selectLeadSummary, selectSearch, selectSelectedLeadIds, selectTotalCount, setActiveTab, setAdvFilters, setColCallTimeFilter, setColStatusFilter, setDateFilter, setSearch, toggleLeadSelection
+  fetchLeads,
+  fetchLeadSummary,
+  toggleLeadSelection,
+  clearLeadSelection,
+  setSearch,
+  setActiveTab,
+  setDateFilter,
+  setColStatusFilter,
+  setColCallTimeFilter,
+  setAdvFilters,
+  resetFilters,
+  selectSelectedLeadIds,
+  selectLeads,
+  selectTotalCount,
+  selectIsLeadsLoading,
+  selectLeadsError,
+  selectLeadSummary,
+  selectIsSummaryLoading,
+  selectSearch,
+  selectActiveTab,
+  selectDateFilter,
+  selectColStatusFilter,
+  selectColCallTimeFilter,
+  selectAdvFilters,
+  selectFilteredLeads,
 } from './store/leadSlice';
-export type { GetLeadsParams, GetLeadsResponse, Lead, LeadSummaryResponse } from './types/leads.types';

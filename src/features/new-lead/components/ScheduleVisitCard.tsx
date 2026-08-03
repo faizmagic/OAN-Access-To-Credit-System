@@ -1,12 +1,12 @@
-import { DatePickerField } from '@/components/ui/DatePickerField';
 import { logger } from '@/lib/logger';
-import { normalizeLeadId } from '@/lib/utils';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { Calendar, CalendarCheck, CheckCircle, Clock, MapPin, Pencil, XCircle } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useParams } from 'next/navigation';
 import { useState } from 'react';
-import { fetchVisitSchedulesThunk, scheduleVisitThunk, selectIsLeadFinalized, selectVisitState, setVisitSchedule, updateVisitScheduleStatusThunk } from '..';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectVisitState, selectIsLeadFinalized, setVisitSchedule, scheduleVisitThunk, fetchVisitSchedulesThunk, updateVisitScheduleStatusThunk } from '..';
+import { Calendar, CalendarCheck, Clock, MapPin, Pencil, CheckCircle, XCircle } from 'lucide-react';
+import { DatePickerField } from '@/components/ui/DatePickerField';
+import { useParams } from 'next/navigation';
+import { normalizeLeadId } from '@/lib/utils';
+import dynamic from 'next/dynamic';
 
 const ScheduleNewVisitForm = dynamic(() => import('./modals/ScheduleNewVisitForm').then(mod => mod.ScheduleNewVisitForm), {
   ssr: false,
